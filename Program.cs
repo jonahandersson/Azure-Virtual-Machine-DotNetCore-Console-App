@@ -13,8 +13,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
         {
             Console.WriteLine("Azure Virtual Creation using .NET Core 3.0!");
             
-            //Create the management client. This will be used for all the operations
-            //that we will perform in Azure.
+            //Create the management client. This will be used for all the operations that we will perform in Azure.
             var credentials = SdkContext.AzureCredentialsFactory
                                         .FromFile("./azureauth.properties");
 
@@ -23,8 +22,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .Authenticate(credentials)
                 .WithDefaultSubscription();
 
-            //First of all, we need to create a resource group where we will add all the resources
-            // needed for the virtual machine
+            //First of all, we need to create a resource group where we will add all the resources needed for the virtual machine
             var groupName = "rg-dev-azurevm-demo-dotnetcore";
             var vmName = "azvmDemo";
             var location = Region.EuropeNorth;

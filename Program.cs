@@ -11,7 +11,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Azure Virtual Creation using .NET Core 3.0!");
+            Console.WriteLine("Azure Virtual VM Creation using .NET Core 3.1!");
             
             //Create the management client. This will be used for all the operations that we will perform in Azure.
             var credentials = SdkContext.AzureCredentialsFactory
@@ -48,8 +48,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithSubnet(subnetName, subnetAddress)
                 .Create();
 
-            //Any virtual machine need a network interface for connecting to the
-            //virtual network
+            //Any virtual machine need a network interface for connecting to the virtual network
             Console.WriteLine($"Creating network interface {nicName} ...");
             var nic = azure.NetworkInterfaces.Define(nicName)
                 .WithRegion(location)
@@ -73,8 +72,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .Create();
             {
 
-            }
-           
+            }           
              Console.WriteLine($"Created {vmName} ...");
         }
     }

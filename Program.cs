@@ -24,7 +24,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
 
             //First of all, we need to create a resource group where we will add all the resources needed for the virtual machine
             var groupName = "rg-dev-azurevm-demo-dotnetcore";
-            var vmName = "azvmDemo";
+            var vmName = "azureVMDevDemoNetCore";
             var location = Region.EuropeNorth;
             var vNetName = "azvmdemoVNET";
             var vNetAddress = "172.16.0.0/16";
@@ -33,6 +33,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
             var nicName = "azvmDemoNIC";
             var adminUser = "azureadminuser";
             var adminPassword = "Pa$$w0rd!2021";
+            var myNetworkSecurityGroup = "myNSGforAzureVM";
 
             Console.WriteLine($"Creating resource group {groupName} ...");
             var resourceGroup = azure.ResourceGroups.Define(groupName)
@@ -45,8 +46,13 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithRegion(location)
                 .WithExistingResourceGroup(groupName)
                 .WithAddressSpace(vNetAddress)
-                .WithSubnet(subnetName, subnetAddress)
+                .WithSubnet(subnetName, subnetAddress)                
                 .Create();
+
+             var nsg = azure.NetworkSecurityGroups.Define(myNetworkSecurityGroup)
+                     .WithRegion(location)
+                     .WithExistingResourceGroup(groupName)
+                     .Create();
 
             //Any virtual machine need a network interface for connecting to the virtual network
             Console.WriteLine($"Creating network interface {nicName} ...");
@@ -56,6 +62,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithExistingPrimaryNetwork(network)
                 .WithSubnet(subnetName)
                 .WithPrimaryPrivateIPAddressDynamic()
+                .WithNewPrimaryPublicIPAddress()
                 .Create();
 
             //Create the virtual machine
@@ -68,7 +75,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithAdminUsername(adminUser)
                 .WithAdminPassword(adminPassword)
                 .WithComputerName(vmName)
-                .WithSize(VirtualMachineSizeTypes.StandardB1s)
+                .WithSize(VirtualMachineSizeTypes.StandardB1s)            
                 .Create();
             {
 

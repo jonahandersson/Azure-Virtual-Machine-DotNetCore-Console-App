@@ -22,7 +22,8 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .Authenticate(credentials)
                 .WithDefaultSubscription();
 
-            //First of all, we need to create a resource group where we will add all the resources needed for the virtual machine
+            //Temp variables for Azure VM creation. Refactor your private data better way.
+            //Create a resource group in Azure Portal set name resource group name below. RG where we will add all the resources needed for the virtual machine
             var groupName = "rg-dev-azurevm-demo-dotnetcore";
             var vmName = "azureVMDevDemoNetCore";
             var location = Region.EuropeNorth;

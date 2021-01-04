@@ -22,7 +22,8 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .Authenticate(credentials)
                 .WithDefaultSubscription();
 
-            //First of all, we need to create a resource group where we will add all the resources needed for the virtual machine
+            //Temp variables for Azure VM creation. Refactor your private data better way.
+            //Create a resource group in Azure Portal set name resource group name below. RG where we will add all the resources needed for the virtual machine
             var groupName = "rg-dev-azurevm-demo-dotnetcore";
             var vmName = "azvmDemo";
             var location = Region.EuropeNorth;
@@ -31,8 +32,8 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
             var subnetName = "azvmdemoSubnet";
             var subnetAddress = "172.16.0.0/24";
             var nicName = "azvmDemoNIC";
-            var adminUser = "azureadminuser";
-            var adminPassword = "Pa$$w0rd!2021";
+            var adminUser = "azureadminuser"; 
+            var adminPassword = "<<your password Azure VM admin user>>"; 
 
             Console.WriteLine($"Creating resource group {groupName} ...");
             var resourceGroup = azure.ResourceGroups.Define(groupName)
@@ -48,8 +49,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithSubnet(subnetName, subnetAddress)
                 .Create();
 
-            //Any virtual machine need a network interface for connecting to the
-            //virtual network
+            //Any virtual machine need a network interface for connecting to the virtual network
             Console.WriteLine($"Creating network interface {nicName} ...");
             var nic = azure.NetworkInterfaces.Define(nicName)
                 .WithRegion(location)

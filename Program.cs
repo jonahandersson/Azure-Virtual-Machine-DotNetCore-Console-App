@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
@@ -8,8 +9,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 namespace Azure_Virtual_Machine_DotNetCore_Console_App
 {
     class Program
-    {
-        static void Main(string[] args)
+    {        static void Main(string[] args)
         {
             Console.WriteLine("Azure Virtual VM Creation using .NET Core 3.1!");
             
@@ -23,18 +23,23 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithDefaultSubscription();
 
             //Temp variables for Azure VM creation. Refactor your private data better way.
-            //Create a resource group in Azure Portal set name resource group name below. RG where we will add all the resources needed for the virtual machine
-            var groupName = "rg-dev-azurevm-demo-dotnetcore";
-            var vmName = "azureVMDevDemoNetCore";
+            //Create a resource group in Azure Portal set name resource group name below. 
+            
+            var groupName = MyAzureVM.groupName;
+            var vmName = MyAzureVM.vmName; 
             var location = Region.EuropeNorth;
-            var vNetName = "azvmdemoVNET";
-            var vNetAddress = "172.16.0.0/16";
-            var subnetName = "azvmdemoSubnet";
-            var subnetAddress = "172.16.0.0/24";
-            var nicName = "azvmDemoNIC";
-            var adminUser = "azureadminuser";
-            var adminPassword = "Pa$$w0rd!2021";
-            var myNetworkSecurityGroup = "myNSGforAzureVM";
+            var vNetName = MyAzureVM.vNetName;
+            var vNetAddress = MyAzureVM.vNetAddress; 
+            var subnetName =  MyAzureVM.subnetName;
+            var subnetAddress = MyAzureVM.subnetAddress;
+            var nicName =  MyAzureVM.nicName;
+            var adminUser = MyAzureVM.adminUser;
+            var adminPassword =  MyAzureVM.adminPassword;
+            var myNetworkSecurityGroup = MyAzureVM.myNetworkSecurityGroup;
+            
+            //Just a stopwatch to check elapse time on VM creation
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
             Console.WriteLine($"Creating resource group {groupName} ...");
             var resourceGroup = azure.ResourceGroups.Define(groupName)
@@ -47,15 +52,16 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithRegion(location)
                 .WithExistingResourceGroup(groupName)
                 .WithAddressSpace(vNetAddress)
-                .WithSubnet(subnetName, subnetAddress)                
+                .WithSubnet(subnetName, subnetAddress)
                 .Create();
-
+             
+             //Add network security group
              var nsg = azure.NetworkSecurityGroups.Define(myNetworkSecurityGroup)
                      .WithRegion(location)
                      .WithExistingResourceGroup(groupName)
                      .Create();
 
-            //Any virtual machine need a network interface for connecting to the virtual network
+            //Virtual machine need a network interface for connecting to the virtual network
             Console.WriteLine($"Creating network interface {nicName} ...");
             var nic = azure.NetworkInterfaces.Define(nicName)
                 .WithRegion(location)
@@ -81,7 +87,13 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
             {
 
             }           
-             Console.WriteLine($"Created {vmName} ...");
+            Console.WriteLine($"Created {vmName} ...");
+           
+            sw.Stop();
+            Console.WriteLine($"Created {sw.Elapsed}");
+
+            //Delay
+            Console.ReadLine();
         }
     }
 }

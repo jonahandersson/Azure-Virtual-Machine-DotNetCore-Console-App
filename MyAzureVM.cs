@@ -18,6 +18,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
       public static string adminUser = "azureadminuser";
       public static string adminPassword = "Pa$$w0rd!2021";
       public static string  myNetworkSecurityGroup = "myNSGforAzureVM";
+      public static string  publicIPAddress= "azVMPublicIP";
 
    }
 }

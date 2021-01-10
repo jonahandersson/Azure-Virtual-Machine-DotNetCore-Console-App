@@ -5,6 +5,7 @@ using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.Management.Network.Fluent.Models;
 
 namespace Azure_Virtual_Machine_DotNetCore_Console_App
 {
@@ -36,6 +37,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
             var adminUser = MyAzureVM.adminUser;
             var adminPassword =  MyAzureVM.adminPassword;
             var myNetworkSecurityGroup = MyAzureVM.myNetworkSecurityGroup;
+            var publicIPAddress = MyAzureVM.publicIPAddress;
             
             //Just a stopwatch to check elapse time on VM creation
             Stopwatch sw = new Stopwatch();
@@ -47,7 +49,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .Create();
 
             //Every virtual machine needs to be connected to a virtual network.
-            Console.WriteLine($"Creating virtual network {vNetName} ...");
+            Console.WriteLine($"Creating Virtual Network {vNetName} ...");
             var network = azure.Networks.Define(vNetName)
                 .WithRegion(location)
                 .WithExistingResourceGroup(groupName)
@@ -55,21 +57,47 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithSubnet(subnetName, subnetAddress)
                 .Create();
              
-             //Add network security group
-             var nsg = azure.NetworkSecurityGroups.Define(myNetworkSecurityGroup)
+                
+            // Create Public IP address for Azure VM. Necessary to be able to access VM 
+             Console.WriteLine($"Creating Public IP Address {publicIPAddress} ...");
+             var vmPublicIPAddress = azure.PublicIPAddresses.Define(publicIPAddress)
+                    .WithRegion(location)
+                    .WithExistingResourceGroup(resourceGroup)
+                    .Create();
+
+             //Add network security group for securing access to Azure VM
+            Console.WriteLine($"Creating Network Security Group {myNetworkSecurityGroup} ...");
+            var networkSecurityGroup = azure.NetworkSecurityGroups.Define(myNetworkSecurityGroup)
                      .WithRegion(location)
                      .WithExistingResourceGroup(groupName)
                      .Create();
+                     
+             // Network Security Group - 
+            Console.WriteLine($"Creating a Security Rule for allowing the remote access");
+            networkSecurityGroup.Update()
+                .DefineRule("Allow-RDP")
+                    .AllowInbound()
+                    .FromAnyAddress()
+                    .FromAnyPort()
+                    .ToAnyAddress()
+                    .ToPort(3389)
+                    .WithProtocol(SecurityRuleProtocol.Tcp)
+                    .WithPriority(100)
+                    .WithDescription("Allow-RDP")
+                    .Attach()
+                .Apply();
+         
 
-            //Virtual machine need a network interface for connecting to the virtual network
-            Console.WriteLine($"Creating network interface {nicName} ...");
+            //Network interface for VM and for connecting to the virtual network
+            Console.WriteLine($"Creating Network Interface {nicName} ...");
             var nic = azure.NetworkInterfaces.Define(nicName)
                 .WithRegion(location)
                 .WithExistingResourceGroup(groupName)
                 .WithExistingPrimaryNetwork(network)
                 .WithSubnet(subnetName)
                 .WithPrimaryPrivateIPAddressDynamic()
-                .WithNewPrimaryPublicIPAddress()
+                .WithNewPrimaryPublicIPAddress(publicIPAddress)
+                .WithExistingNetworkSecurityGroup(networkSecurityGroup)
                 .Create();
 
             //Create the virtual machine
@@ -84,9 +112,7 @@ namespace Azure_Virtual_Machine_DotNetCore_Console_App
                 .WithComputerName(vmName)
                 .WithSize(VirtualMachineSizeTypes.StandardB1s)            
                 .Create();
-            {
-
-            }           
+                      
             Console.WriteLine($"Created {vmName} ...");
            
             sw.Stop();
